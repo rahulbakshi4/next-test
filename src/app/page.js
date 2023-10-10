@@ -9,28 +9,9 @@ export default function Home() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
 
-  const getNotes = async () => {
-
-  try{
-  const snapShot = await getDocs(collection(db, "notes"));
-  const notes = snapShot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  }));
-if(notes.length > 0){
-  setNotes(notes);
-}
-  }
-  catch(err){
-    console.log(err)
-  }}
-
   const addNote = async (e) => {
-
   e.preventDefault();
-
   try{
-
     if(!content){
       return;
     }
@@ -38,21 +19,23 @@ if(notes.length > 0){
     title: title || "Untitled note",
     content,
   });
-
   setTitle("");
   setContent("");
   }
   catch(err){
     console.log(err)
-  }
-  }
+  }}
 
 
-
- useEffect(() => {
-  getNotes();
-
-  });
+  useEffect(()=>{
+    const unsubscribe = onSnapshot(collection(db, "notes"), (snapshot) => {
+      setNotes(snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })))
+    })
+    return unsubscribe;
+  },[])
 
 
   return (
